@@ -81,6 +81,9 @@ final class LoggerFactory
         return $this->delegateLoggerFactory !== null;
     }
 
+    /**
+     * @return \Logade\Logger
+     */
     public function getLogger($id)
     {
         return $this->getDelegate()->getLogger($id);
