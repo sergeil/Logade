@@ -24,13 +24,13 @@
 
 namespace Logade\Adapters\NullImpl;
 
-use Logade\LoggerFactory,
+use Logade\DelegateLoggerFactory,
     Logade\Adapters\NullImpl\SharedNullLogger;
 
 /**
  * @author Sergei Lissovski <sergei.lissovski@gmail.com>
  */ 
-class SharedNullLoggerFactory implements LoggerFactory
+class SharedNullDelegateLoggerFactory implements DelegateLoggerFactory
 {
     /**
      * @var \Logade\Adapters\NullImpl\SharedNullLogger

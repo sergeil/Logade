@@ -23,16 +23,80 @@
  */
 
 namespace Logade;
+
+use Logade\Adapters\NullImpl\SharedNullDelegateLoggerFactory;
  
 /**
+ * All loggers must be dispensed through this factory, which under the hood
+ * makes use of {@class DelegateLoggerFactory} which you must provide before
+ * invoking {#getLogger()};
+ *
  * @author Sergei Lissovski <sergei.lissovski@gmail.com>
  */ 
-interface LoggerFactory
+final class LoggerFactory
 {
     /**
-     * @param mixed $id  It might be some token that is used to create
-     *                   a logger attached to it or usually an instance/FQCN
-     * @return \Logade\Logger
+     * @var \Logade\LoggerFactory
      */
-    public function getLogger($id);
+    static private $instance;
+
+    /**
+     * @var \Logade\DelegateLoggerFactory
+     */
+    private $delegateLoggerFactory;
+
+    /**
+     * @param \Logade\DelegateLoggerFactory $factory
+     * @return boolean true is delegate-logger was set and false if it was
+     *                 already initialized before and the attempt was ignored
+     */
+    public function setDelegate(DelegateLoggerFactory $factory)
+    {
+        if (null === $this->delegateLoggerFactory) {
+            $this->delegateLoggerFactory = $factory;
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return \Logade\DelegateLoggerFactory
+     */
+    public function getDelegate()
+    {
+        if ($this->delegateLoggerFactory === null) {
+            $this->delegateLoggerFactory = new SharedNullDelegateLoggerFactory();
+        }
+
+        return $this->delegateLoggerFactory;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInitialized()
+    {
+        return $this->delegateLoggerFactory !== null;
+    }
+
+    public function getLogger($id)
+    {
+        return $this->getDelegate()->getLogger($id);
+    }
+
+    /**
+     * @return \Logade\LoggerFactory
+     */
+    static public function getInstance()
+    {
+        if (null === self::$instance) {
+            self::$instance = new static();
+        }
+
+        return self::$instance;
+    }
+
+    private function __construct() {}
 }
