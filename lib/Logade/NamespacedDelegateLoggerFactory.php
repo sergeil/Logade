@@ -25,19 +25,49 @@
 namespace Logade;
 
 /**
- * All logger factories must implement this interface and later
- * be injected in {@class LoggerFactory} singleton.
- *
  * @author Sergei Lissovski <sergei.lissovski@gmail.com>
- */
-interface DelegateLoggerFactory
+ */ 
+class NamespacedDelegateLoggerFactory implements DelegateLoggerFactory
 {
-    const CLAZZ = 'Logade\DelegateLoggerFactory';
+    /**
+     * @var array
+     */
+    private $factories = array();
+
+    public function mapDelegate($namespace, DelegateLoggerFactory $factory)
+    {
+        $this->factories[$namespace] = $factory;
+    }
 
     /**
-     * @param mixed $id  It might be some token that is used to create
-     *                   a logger attached to it or usually an instance/FQCN
-     * @return \Logade\Logger
+     * @return array
      */
-    public function getLogger($id);
+    public function getMappedDelegates()
+    {
+        return $this->factories;
+    }
+
+    /**
+     * @throws \Logade\Exception
+     *
+     * {@inheritdoc}
+     */
+    public function getLogger($id)
+    {
+        $token = is_object($id) ? get_class($id) : $id;
+
+        foreach ($this->getMappedDelegates() as $namespace => $factory) {
+            $namespace = str_replace('\\', '\\\\', $namespace);
+            if (preg_match("/^$namespace/", $token)) {
+                return $factory->getLogger($id);
+            }
+        }
+
+        throw new Exception(
+            sprintf(
+                'Unable to find a delegate-logger that is mapped to be responsible for "%s" namespace(class/token). ',
+                $token
+            )
+        );
+    }
 }

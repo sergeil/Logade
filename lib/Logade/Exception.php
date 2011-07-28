@@ -25,19 +25,9 @@
 namespace Logade;
 
 /**
- * All logger factories must implement this interface and later
- * be injected in {@class LoggerFactory} singleton.
- *
  * @author Sergei Lissovski <sergei.lissovski@gmail.com>
- */
-interface DelegateLoggerFactory
+ */ 
+class Exception extends \Exception
 {
-    const CLAZZ = 'Logade\DelegateLoggerFactory';
-
-    /**
-     * @param mixed $id  It might be some token that is used to create
-     *                   a logger attached to it or usually an instance/FQCN
-     * @return \Logade\Logger
-     */
-    public function getLogger($id);
+    
 }
